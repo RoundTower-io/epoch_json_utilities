@@ -2,25 +2,54 @@
 This is the calling script for the epoch library
 """
 import epoch
+import json
+
 
 resp = epoch.get_collector_list()
-
-#print(len(resp["collector_list"]))
+no_tags = []
+no_host = []
+no_os = []
+os_undefined = []
+hosts_total = 0
 for host in resp["collector_list"]:
-    cid = epoch.get_collector_id_from_host_name(host["host_name"], resp)
-    single = epoch.get_single_collector_info(cid)
-    print(str(host["host_name"]) + " " + str(single["metadata"]["tags"]))
+    hosts_total += 1
+    if host["host_name"]:
+        print(str(host["host_name"]) + ": ", end='', flush=True)
+    else:
+        print("------------>No hostname field in structure for: " + host["host_name"])
+        no_host.append(host["host_name"])
 
-# for role in ["dev", "qa", "prod"]:
-#     hosts = get_hosts_for_env(role)
-#     print(role + " hosts: " + str(len(hosts)))
+    tags = epoch.get_api_tags(host["host_name"])
+    if tags:
+        dtags = tags[0]
+        if "appdb_os_release" in dtags["tags"]:
+            if str(dtags["tags"]["appdb_os_release"]) == "undefined":
+                os_undefined.append(host["host_name"])
+            print(str(dtags["tags"]["appdb_os_release"]))
+        else:
+            print("No OS Release Defined!")
+            no_os.append(host["host_name"])
+    else:
+        print("-----------> NO tags returned")
+        no_tags.append(host["host_name"])
+
+print("Total hosts: " + str(hosts_total))
+print("Missing hostname total: " + str(len(no_host)))
+print("Missing tags total: " + str(len(no_tags)))
+print("Missing OS:" + str(len(no_os)))
+print("Undefined OS:" + str(len(os_undefined)))
 
 
-# resp = get_collector_list()
-# for host in resp["collector_list"]:
-#     print("host: " + str(host["host_name"]))
-#     pprint.pprint(get_api_tags(host["host_name"]))
+# Save the file
+with open('no_host.txt', 'w') as f:
+    json.dump(no_host, f)
 
+with open('no_tags.json', 'w') as g:
+    json.dump(no_tags, g)
 
+with open('no_os.json', 'w') as h:
+    json.dump(no_os, h)
 
-#pprint.pprint(get_api_tags_paginated(5000, 1))
+with open('os_undefined.json', 'w') as i:
+    json.dump(os_undefined, i)
+
