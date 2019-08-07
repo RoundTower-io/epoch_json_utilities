@@ -3,7 +3,7 @@ This is the calling script for the epoch library
 """
 import epoch
 import json
-
+import pprint
 
 resp = epoch.get_collector_list()
 no_tags = []
@@ -16,8 +16,8 @@ for host in resp["collector_list"]:
     if host["host_name"]:
         print(str(host["host_name"]) + ": ", end='', flush=True)
     else:
-        print("------------>No hostname field in structure for: " + host["host_name"])
-        no_host.append(host["host_name"])
+        print("------------>No hostname field in structure")
+        pprint.pprint(host)
 
     tags = epoch.get_api_tags(host["host_name"])
     if tags:
@@ -36,8 +36,8 @@ for host in resp["collector_list"]:
 print("Total hosts: " + str(hosts_total))
 print("Missing hostname total: " + str(len(no_host)))
 print("Missing tags total: " + str(len(no_tags)))
-print("Missing OS:" + str(len(no_os)))
-print("Undefined OS:" + str(len(os_undefined)))
+print("Missing OS: " + str(len(no_os)))
+print("Undefined OS: " + str(len(os_undefined)))
 
 
 # Save the file
