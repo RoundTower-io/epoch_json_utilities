@@ -7,3 +7,6 @@ This is is the library
 
 ## query.py
 This file calls the library
+
+## query2.py
+Calls the library for other tests
