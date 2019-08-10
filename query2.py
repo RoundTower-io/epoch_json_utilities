@@ -23,7 +23,5 @@ json_topo = """
 }
 """
 data = json.loads(json_topo)
-#print(data)
 topo = epoch.post_topology(data)
-
 pprint.pprint(topo)
