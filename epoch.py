@@ -5,10 +5,15 @@ This is an API wrapper library for Nutanix's Epoch tool.
 
 import os
 import requests
+import logging
+import http.client as http_client
+import json
 
-API_KEY = os.environ['EPOCH_KEY']
+EPOCH_KEY = os.environ['EPOCH_KEY']
 EPOCH_URL = os.environ['EPOCH_URL']
-#https://uopx.epoch.nutanix.com/
+
+
+# https://uopx.epoch.nutanix.com/
 
 #
 # API Wrappers
@@ -19,9 +24,9 @@ def get_collector_list():
     https://app.swaggerhub.com/apis-docs/nutanix-epoch/epoch/1.12.20#/collectors/collectorList
     :return: The output of the API call
     """
-    global EPOCH_URL, API_KEY
+    global EPOCH_URL, EPOCH_KEY
     r = requests.get(url=str(EPOCH_URL + "sp-lb/collector-list"),
-                     headers={"x-app-key": API_KEY})
+                     headers={"x-app-key": EPOCH_KEY})
     if r.status_code == requests.codes.ok:
         return r.json()
     raise Exception("get collector list rc=%d" % r.status_code)
@@ -35,9 +40,9 @@ def get_single_collector_info(collector_id):
     :param collector_id: The collector (host) ID
     :return: Detailed information about the host
     """
-    global EPOCH_URL, API_KEY
+    global EPOCH_URL, EPOCH_KEY
     r = requests.get(url=str(EPOCH_URL + "sp-lb/single-collector-info/collector/" + collector_id),
-                     headers={"x-app-key": API_KEY})
+                     headers={"x-app-key": EPOCH_KEY})
     if r.status_code == requests.codes.ok:
         return r.json()
     raise Exception("get single collector info rc=%d" % r.status_code)
@@ -50,9 +55,9 @@ def get_api_tags(hostname):
     :param hostname:  The host name
     :return: JSON structure containing the tag information
     """
-    global EPOCH_URL, API_KEY
+    global EPOCH_URL, EPOCH_KEY
     r = requests.get(url=str(EPOCH_URL + "api/v1/tags/hosts/" + hostname),
-                     headers={"x-app-key": API_KEY})
+                     headers={"x-app-key": EPOCH_KEY})
     if r.status_code == requests.codes.ok:
         return r.json()
     raise Exception("Get API tags rc=%d" % r.status_code)
@@ -65,12 +70,43 @@ def get_all_api_tags_paginated(pagesize, pagenumber):
     :param pagenumber: The page number
     :return: A JSON struct with the tag information for each host
     """
-    global EPOCH_URL, API_KEY
+    global EPOCH_URL, EPOCH_KEY
     r = requests.get(url=str(EPOCH_URL + "api/v1/tags/hosts/" + str(pagesize) + "/" + str(pagenumber)),
-                     headers={"x-app-key": API_KEY})
+                     headers={"x-app-key": EPOCH_KEY})
     if r.status_code == requests.codes.ok:
         return r.json()
     raise Exception("Get API tags paginated rc=%d" % r.status_code)
+
+
+def get_topology_maps():
+    global EPOCH_URL, EPOCH_KEY
+    r = requests.get(url=str(EPOCH_URL + "auth-api/topology-map"),
+                     headers={"x-app-key": EPOCH_KEY})
+    if r.status_code == requests.codes.ok:
+        return r.json()
+    raise Exception("Get topology maps rc=%d" % r.status_code)
+
+
+def get_one_topology_map(topology_map_id):
+    global EPOCH_URL, EPOCH_KEY
+    r = requests.get(url=str(EPOCH_URL + "auth-api/topology-map/" + topology_map_id),
+                     headers={"x-app-key": EPOCH_KEY})
+    if r.status_code == requests.codes.ok:
+        return r.json()
+    raise Exception("Get one topology map rc=%d" % r.status_code)
+
+
+def post_topology(epoch_filter):
+    global EPOCH_URL, EPOCH_KEY
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain', "x-app-key": EPOCH_KEY}
+
+    r = requests.post(url=str(EPOCH_URL + "api/v3/topology"),
+                      data=json.dumps(epoch_filter),
+                      headers=headers)
+    if r.status_code == requests.codes.ok:
+        return r.json()
+    raise Exception("Get topology rc=%d" % r.status_code)
+
 
 #
 #

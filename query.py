@@ -7,7 +7,7 @@ import pprint
 
 resp = epoch.get_collector_list()
 no_tags = []
-no_host = []
+no_host = 0
 no_os = []
 os_undefined = []
 hosts_total = 0
@@ -18,6 +18,8 @@ for host in resp["collector_list"]:
     else:
         print("------------>No hostname field in structure")
         pprint.pprint(host)
+        no_host += 1
+        continue
 
     tags = epoch.get_api_tags(host["host_name"])
     if tags:
@@ -34,15 +36,10 @@ for host in resp["collector_list"]:
         no_tags.append(host["host_name"])
 
 print("Total hosts: " + str(hosts_total))
-print("Missing hostname total: " + str(len(no_host)))
+print("Missing hostname total: " + str(no_host))
 print("Missing tags total: " + str(len(no_tags)))
 print("Missing OS: " + str(len(no_os)))
 print("Undefined OS: " + str(len(os_undefined)))
-
-
-# Save the file
-with open('no_host.txt', 'w') as f:
-    json.dump(no_host, f)
 
 with open('no_tags.json', 'w') as g:
     json.dump(no_tags, g)
